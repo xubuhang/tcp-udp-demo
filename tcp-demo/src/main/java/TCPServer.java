@@ -1,5 +1,3 @@
-package com.xubh;
-
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -14,8 +12,25 @@ public class TCPServer {
     private static ConcurrentHashMap<Socket, DataOutputStream> outputStreamMap = new ConcurrentHashMap<>();
     private static ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
+    static String rootPath ;
     public static void main(String[] args) {
-        try (ServerSocket serverSocket = new ServerSocket(12345)) {
+        rootPath = "/home/FileSpace"; // 默认根路径
+        int port = 12345; // 默认端口
+
+        // 解析命令行参数
+        if (args.length >= 2) {
+
+            try {
+                port = Integer.parseInt(args[0]); // 第二个参数为端口
+            } catch (NumberFormatException e) {
+                System.out.println("无效的端口号，使用默认端口 12345");
+            }
+            rootPath = args[1]; // 第一个参数为根路径
+        } else {
+            System.out.println("使用默认根路径和端口,port:"+port+" "+"rootPath:"+rootPath);
+        }
+
+        try (ServerSocket serverSocket = new ServerSocket(port)) {
             System.out.println("Server started. Listening on port 12345...");
             startHeartbeat();
             while (true) {
@@ -59,9 +74,13 @@ public class TCPServer {
             removeClient(clientSocket);
         }
     }
-
     private static void saveFile(DataInputStream dataInputStream, Socket clientSocket, String fileName) {
-        File file = new File("C:/Users/xubh/Downloads/files/" + fileName);
+
+        File file = new File(rootPath + fileName);
+        File dir = file.getParentFile();
+        if(!dir.exists()){
+            dir.mkdirs();
+        }
         try (FileOutputStream fos = new FileOutputStream(file)) {
             byte[] buffer = new byte[8192];
             int bytesRead;
