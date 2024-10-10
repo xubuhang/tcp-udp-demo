@@ -31,7 +31,7 @@ public class TCPServer {
         }
 
         try (ServerSocket serverSocket = new ServerSocket(port)) {
-            System.out.println("Server started. Listening on port 12345...");
+            System.out.println("Server started. Listening on port "+port+"...");
             startHeartbeat();
             while (true) {
                 Socket clientSocket = serverSocket.accept();
